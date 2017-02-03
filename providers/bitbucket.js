@@ -8,7 +8,7 @@ var go = function () {
 
 var signIn = function (user, screenshots, callback) {
     browser.driver.wait(function() {
-        return browser.driver.isElementPresent(by.xpath(constant.XPATH_BITBUCKET_LOGINFORM));
+        return browser.driver.findElement(by.xpath(constant.XPATH_BITBUCKET_LOGINFORM));
     }, 10000).then(function () {
         console.log('Input username: ' + user.username);
 

@@ -24,23 +24,27 @@ var signIn = function (user, screenshots, callback) {
     console.log('github signin');
 
     browser.driver.wait(function() {
-        return browser.driver.isElementPresent(by.xpath('//div[contains(@class,"auth-form-body")]'));
+        return browser.driver.findElement(by.xpath('//div[contains(@class,"auth-form-body")]')).then(function () {
+            return true;
+        });
     }, 10000).then(function () {
 
         console.log('Input username: ' + user.username);
 
-        var usernameEditText = helper.findElement(by.name('login'));
-        usernameEditText.sendKeys(user.username);
+        browser.driver.findElement(by.name('login')).then(function (elem) {
+            elem.sendKeys(user.username);
+            console.log('Input password');
 
-        console.log('Input password');
-
-        var passwordEditText = helper.findElement(by.name('password'));
-        passwordEditText.sendKeys(user.password);
-
-        console.log('Click on the Sign in');
-        helper.findElement(by.name('commit')).click();
-        helper.sleep(1000);
-        authorizeApp(screenshots, callback);
+            browser.driver.findElement(by.name('password')).then(function (elem) {
+                elem.sendKeys(user.password);
+                console.log('Click on the Sign in');
+                browser.driver.findElement(by.name('commit')).then(function (elem) {
+                    elem.click();
+                    helper.sleep(1000);
+                    authorizeApp(screenshots, callback);
+                });
+            });
+        });
     }, function() {
         authorizeApp(screenshots, callback);
     });
@@ -48,7 +52,7 @@ var signIn = function (user, screenshots, callback) {
 
 var authorizeApp = function (screenshots, callback) {
     browser.driver.wait(function() {
-        return browser.driver.isElementPresent(by.xpath(constant.XPATH_AUTH_APP));
+        return browser.driver.findElement(by.xpath(constant.XPATH_AUTH_APP));
     }, 5000).then(function() {
         var btnAuthorizeApp = helper.findElement(by.xpath(constant.XPATH_BTN_AUTH_APP));
         helper.takeScreenshot('authorize_app.png', screenshots);
@@ -84,10 +88,10 @@ var signOut = function () {
 var revokeApp = function (user, appNames, screenshots) {
     var formatStr = helper.format(constant.XPATH_IMG_USER_GITHUB, user.username);
     console.log('String:' + formatStr);
-    browser.driver.isElementPresent(by.xpath(formatStr)).then(function (present) {
+    browser.driver.findElement(by.xpath(formatStr)).then(function (present) {
         console.log('wait for avatar:' + present);
         if(!present) {
-            browser.driver.isElementPresent(by.xpath(constant.XPATH_PROFILE_GITHUB)).then(function (present) {
+            browser.driver.findElement(by.xpath(constant.XPATH_PROFILE_GITHUB)).then(function (present) {
                 console.log('element:' + present);
                 if(present) {
                     signOut();
@@ -128,7 +132,7 @@ var revoke = function (appName, screenshots) {
         var formatStr = helper.format(constant.XPATH_ITEM_OAUTH_APPS_GITHUB, appName);
         console.log('Appname:' + formatStr + '; items:' + items.length);
         items.forEach(function (item, i, items) {
-            browser.driver.isElementPresent(by.xpath(formatStr)).then(function (present) {
+            browser.driver.findElement(by.xpath(formatStr)).then(function (present) {
                 console.log('found#####' + present);
                 if(present) {
                     console.log('Click on the button Revoke');

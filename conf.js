@@ -1,6 +1,6 @@
 /**
  * Created by nikolai on 16.4.16.
- *
+ * @author nikolai
  */
 var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
 

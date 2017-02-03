@@ -1,5 +1,5 @@
 var Constant = function () {
-    this.DEFAULT_TIMEOUT = 10000;
+    this.DEFAULT_TIMEOUT = 15000;
     //this.XPATH_LOGIN = '//ul[@id=\"menu-main-nav\"]//*[text()=\"Login\"]';
     this.XPATH_LOGIN = '//a[@href="http://g.codefresh.io/login"]';
     this.XPATH_GITHUB_SIGNUP = '//button//*[text()="Sign Up with Github"]';

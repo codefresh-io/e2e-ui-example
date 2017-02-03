@@ -16,29 +16,32 @@ var User = function (user, screenshots) {
 
 User.prototype.login2 = function (callback) {
     self = this;
-    browser.wait(function() {
-        return browser.driver.isElementPresent(by.xpath(constant.XPATH_LOGIN));
+
+    browser.driver.wait(function() {
+        return browser.driver.findElement(by.xpath(constant.XPATH_LOGIN)).then(function (elem) {
+            return true;
+        });
     }, constant.DEFAULT_TIMEOUT).then(
         function () {
-            var btnLogin = helper.findElement(by.xpath(constant.XPATH_LOGIN));
-            btnLogin.click().then(function () {
-                console.log('Click on the button Login');
-            });
-            signIn({
-                'github':{'xpath': constant.XPATH_GITHUB_SIGNIN},
-                'bitbucket':{'xpath': constant.XPATH_BITBUCKET_SIGNIN}
-            }, callback);
-        }, function() {
-            browser.driver.isElementPresent(by.xpath(constant.XPATH_GITHUB_SIGNUP)).then(function (present) {
-                console.log('isExist:' + present);
-                if(present) {
+            console.log('pass');
+            browser.driver.findElement(by.xpath(constant.XPATH_LOGIN)).then(function (elem) {
+                elem.click().then(function () {
+                    console.log('Click on the button Login');
                     signIn({
-                        'github':{'xpath': constant.XPATH_GITHUB_SIGNUP},
-                        'bitbucket':{'xpath': constant.XPATH_BITBUCKET_SIGNUP}
+                        'github':{'xpath': constant.XPATH_GITHUB_SIGNIN},
+                        'bitbucket':{'xpath': constant.XPATH_BITBUCKET_SIGNIN}
                     }, callback);
-                } else {
-                    loggedIn(callback);
-                }
+                });
+            });
+        }, function() {
+            console.log('fail');
+            browser.driver.findElement(by.xpath(constant.XPATH_GITHUB_SIGNUP)).then(function () {
+                signIn({
+                    'github':{'xpath': constant.XPATH_GITHUB_SIGNUP},
+                    'bitbucket':{'xpath': constant.XPATH_BITBUCKET_SIGNUP}
+                }, callback);
+            }, function (err) {
+                loggedIn(callback);
             });
         });
 };
@@ -55,37 +58,45 @@ var getXpathByProviderName = function (jsonData, provider) {
 
 var signIn = function (jsonData, callback) {
     var xpath = getXpathByProviderName(jsonData, self.type);
+    console.log('signin path ' + xpath);
     browser.wait(function() {
-        return browser.driver.isElementPresent(by.xpath(xpath));
+        return browser.driver.findElement(by.xpath(xpath)).then(function (elem) {
+            return true;
+        });
     }, constant.DEFAULT_TIMEOUT).then(
         function () {
-            var btnSignIn = helper.findElement(by.xpath(xpath));
-            btnSignIn.click();
-            if(self.type == 'github') {
-                github.signIn(self, self.screenshots, function () {
-                    browser.driver.wait(function () {
-                        return browser.driver.isElementPresent(by.xpath(constant.XPATH_USER_DROPDOWN));
-                    }, constant.DEFAULT_TIMEOUT).then(
-                        function () {
-                            callback();
-                        },
-                        function () {
-                            callback();
-                        }
-                    );
-                });
-            } else if(self.type == 'bitbucket') {
-                console.log('bitbucket login');
-                bitbucket.signIn(self, self.screenshots, function () {
-                    browser.driver.wait(function () {
-                        return browser.driver.isElementPresent(by.xpath(constant.XPATH_USER_DROPDOWN));
-                    }, constant.DEFAULT_TIMEOUT).then(
-                        function () { callback(); },
-                        function () { callback(); }
-                    );
-                });
-            }
+            console.log('signin pass');
+            browser.driver.sleep(5000);
+
+            browser.driver.findElement(by.xpath(xpath)).then(function (elem) {
+                elem.click();
+                if(self.type == 'github') {
+                    github.signIn(self, self.screenshots, function () {
+                        browser.driver.wait(function () {
+                            return browser.driver.findElement(by.xpath(constant.XPATH_USER_DROPDOWN));
+                        }, constant.DEFAULT_TIMEOUT).then(
+                            function () {
+                                callback();
+                            },
+                            function () {
+                                callback();
+                            }
+                        );
+                    });
+                } else if(self.type == 'bitbucket') {
+                    console.log('bitbucket login');
+                    bitbucket.signIn(self, self.screenshots, function () {
+                        browser.driver.wait(function () {
+                            return browser.driver.findElement(by.xpath(constant.XPATH_USER_DROPDOWN));
+                        }, constant.DEFAULT_TIMEOUT).then(
+                            function () { callback(); },
+                            function () { callback(); }
+                        );
+                    });
+                }
+            });
         }, function () {
+            console.log('sign in fail');
             loggedIn(callback);
         });
 };
@@ -93,62 +104,79 @@ var signIn = function (jsonData, callback) {
 User.prototype.login = function(callback) {
     self = this;
     browser.driver.wait(function() {
-        return !browser.driver.isElementPresent(by.xpath(constant.XPATH_LOGIN));
-    }, 3000).then(
+        return !browser.driver.findElement(by.xpath(constant.XPATH_LOGIN)).then(function () {
+            return false;
+        }, function (err) {
+            return true;
+        });
+    }, 5000).then(
         function () {
             loggedIn(callback);
         },
         function() {
-            var btnLogin = helper.findElement(by.xpath(constant.XPATH_LOGIN));
-            btnLogin.click().then(function () {
-                console.log('Click on the button Login ');
-            });
+            browser.driver.findElement(by.xpath(constant.XPATH_LOGIN)).then(function (elem) {
+                elem.click().then(function () {
+                    console.log('Click on the button Login ');
+                    browser.driver.wait(function() {
+                        return browser.driver.findElement(by.xpath(constant.XPATH_GITHUB_SIGNIN)).then(function (elem) {
+                            return true;
+                        });
+                    }, constant.DEFAULT_TIMEOUT).then(
+                        function () {
+                            browser.driver.findElement(by.xpath(constant.XPATH_GITHUB_SIGNIN)).then(function (elem) {
+                                elem.click();
+                                github.signIn(self, self.screenshots, function () {
+                                    browser.driver.wait(function() {
+                                        return browser.driver.findElement(by.xpath(constant.XPATH_USER_DROPDOWN));
+                                    }, 10000).then(function () {
+                                        callback();
+                                    }, function (err) {
 
-            browser.wait(function() {
-                return browser.driver.isElementPresent(by.xpath(constant.XPATH_GITHUB_SIGNIN));
-            }, constant.DEFAULT_TIMEOUT).then(
-                function () {
-                    var btnGithubSignIn = helper.findElement(by.xpath(constant.XPATH_GITHUB_SIGNIN));
-                    btnGithubSignIn.click();
-
-                    github.signIn(self, self.screenshots, function () {
-                        helper.waitForHandleElement(by.xpath(constant.XPATH_USER_DROPDOWN), 10000, function () {
-                            callback();
-                        }, function () { });
-                    });
-                }, function () {
-                    loggedIn(callback);
+                                    });
+                                });
+                            });
+                        }, function () {
+                            loggedIn(callback);
+                        });
                 });
+            });
         });
 };
 
 var loggedIn = function (callback) {
     var formatStr = helper.format(constant.XPATH_USER_DROPDOWN_TEXT, self.username);
-    browser.driver.isElementPresent(by.xpath(formatStr)).then(function (present) {
-        console.log('logged');
-        if(!present) {
-            self.logout();
-            self.login(callback);
-        } else callback();
+    browser.driver.findElement(by.xpath(formatStr)).then(function () {
+        callback();
+    }, function (err) {
+        self.logout();
+        self.login(callback);
     });
 };
 
 User.prototype.logout = function () {
-    browser.driver.isElementPresent(by.xpath(constant.XPATH_USER_DROPDOWN)).then(function (present) {
+    browser.driver.sleep(3000);
+    browser.driver.findElement(by.xpath(constant.XPATH_USER_DROPDOWN)).then(function () {
         console.log('Logout from account');
-        var user_dropdown = helper.findElement(by.xpath(constant.XPATH_USER_DROPDOWN));
-        user_dropdown.click();
-        helper.sleep(1000);
+        browser.driver.findElement(by.xpath(constant.XPATH_USER_DROPDOWN)).then(function (elem) {
+            elem.click();
+            browser.driver.sleep(1000);
 
-        var logout = helper.findElement(by.xpath(constant.XPATH_LOGOUT));
-        logout.click();
-
-        helper.waitForElement(by.xpath(constant.XPATH_GITHUB_SIGNUP), constant.DEFAULT_TIMEOUT);
+            browser.driver.findElement(by.xpath(constant.XPATH_LOGOUT)).then(function (elem) {
+                elem.click();
+                browser.driver.wait(function() {
+                    return browser.driver.findElement(by.xpath(constant.XPATH_GITHUB_SIGNUP));
+                }, constant.DEFAULT_TIMEOUT).then(function () {
+                    console.log('Test passed!');
+                }, function (err) {
+                    console.log('Test failed!');
+                });
+            });
+        });
     });
 };
 
 User.prototype.isLogged = function () {
-    browser.driver.isElementPresent();
+    browser.driver.findElement();
 };
 
 module.exports.User = User;

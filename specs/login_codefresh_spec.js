@@ -35,13 +35,13 @@ describe('Login to Codefresh', function() {
         });
     });
 
-    it('sign in to Codefresh using bitbucket account', function () {
-        screenshots = reportFolder + "270418/";
-        currentUser = new user.User(users[1], screenshots);
-        currentUser.login2(function () {
-            helper.sleep(1000);
-            helper.takeScreenshot('login_success.png', screenshots);
-            currentUser.logout();
-        });
-    });
+    // it('sign in to Codefresh using bitbucket account', function () {
+    //     screenshots = reportFolder + "270418/";
+    //     currentUser = new user.User(users[1], screenshots);
+    //     currentUser.login2(function () {
+    //         helper.sleep(1000);
+    //         helper.takeScreenshot('login_success.png', screenshots);
+    //         currentUser.logout();
+    //     });
+    // });
 });

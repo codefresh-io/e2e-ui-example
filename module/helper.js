@@ -23,13 +23,13 @@ var takeScreenshot = function (filename, folder) {
 
 var waitForHandleElement = function (by, timeout, func_success, func_fail) {
     browser.driver.wait(function() {
-        return browser.driver.isElementPresent(by);
+        return browser.driver.findElement(by);
     }, timeout).then(func_success(), func_fail());
 };
 
 var waitForElement = function (by, timeout) {
     return browser.driver.wait(function() {
-        return browser.driver.isElementPresent(by);
+        return browser.driver.findElement(by);
     }, timeout);
 };
 
