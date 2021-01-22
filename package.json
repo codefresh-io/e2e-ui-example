@@ -7,7 +7,7 @@
   ],
 
   "dependencies": {
-    "mkdirp": "~0.3.5",
+    "mkdirp": "~0.5.5",
     "protractor-jasmine2-screenshot-reporter": "^0.3.1",
     "jasmine-spec-reporter": "^2.5.0"
   },
